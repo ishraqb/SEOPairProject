@@ -1,0 +1,70 @@
+
+CLI input
+- validate input
+- save trip request to SQLite
+- read trip request from SQLite
+- use fake flight/hotel/activity data
+- build 3 skeletons for the plans
+- send each of these skeletons to Gemini
+- Gemini creates an itinerary 
+    - "Given these selected flights, hotels, budgets, and interests, write a clear day-by-day itinerary."
+- save Gemini's text response
+- print output to terminal
+
+Database Design
+
+- TRIPS
+    - ID
+    - Destination
+    - Days
+    - Budget
+    - Traveler_Count
+    - Traveler_Style
+    - Interests
+    - Created_At
+- FLIGHTS
+    - ID
+    - Trip_ID
+    - Tier
+    - Airline
+    - Price
+    - Duration
+- HOTELS
+    - ID
+    - Trip_ID
+    - Tier
+    - Name
+    - Price_Per_Night
+    - Rating
+    - Location
+- ACTIVITIES
+    - ID
+    - Trip_ID
+    - Name
+    - Cost
+    - Category
+    - Description
+- PLANS
+    - ID
+    - Trip_ID
+    - Plan_Type (Cheapest, Balanced, Experience-Focused)
+    - Flight_ID
+    - Hotel_ID
+    - Total_Cost
+    - Remaining_Budget
+    - Itinerary_Text
+- PLAN_ACTIVITIES
+    - ID
+    - Plan_ID
+    - Activity_ID
+    - Day_Number
+
+Planner Design
+- 3 plan skeletons
+    - Plan Name (Cheapest, Balanced, Experienced-Focused)
+    - Total Cost
+    - Remaining Budget
+    - Selected Flight + Cost
+    - Selected Hotel + Cost
+    - Recommended Activity Organized by Day
+    - Generated Itinerary
