@@ -206,8 +206,16 @@ def get_hotel(hotel_id):
         return dict(row._mapping)
 
 """ Returns plan activities in dictionary format """
-def get_plan_activites(plan_id):
-    res = select(PLAN_ACTIVITIES).where(PLAN_ACTIVITIES.c.ID == plan_id)
+def get_plan_activities(plan_id):
+    res = select(PLAN_ACTIVITIES).where(PLAN_ACTIVITIES.c.Plan_ID == plan_id)
+    with engine.connect() as connection:
+        result = connection.execute(res)
+        rows = result.fetchall()
+        return [dict(row._mapping) for row in rows]
+
+""" Returns activity and all its information in dictionary format """
+def get_activity(activity_id):
+    res = select(ACTIVITIES).where(ACTIVITIES.c.ID == activity_id)
     with engine.connect() as connection:
         result = connection.execute(res)
         row = result.fetchone()
@@ -217,7 +225,7 @@ def get_plan_activites(plan_id):
 
 """ Returns plan information in dictionary format """
 def get_plan(plan_id):
-    res = select(PLANS).where(FLIGHTS.c.ID == flight_id)
+    res = select(PLANS).where(PLANS.c.ID == plan_id)
     with engine.connect() as connection:
         result = connection.execute(res)
         row = result.fetchone()
@@ -235,6 +243,30 @@ def get_plans(trip_id):
         for row in rows:
             res.append(dict(row._mapping))
         return res
+    
+def get_plan_details(plan_id):
+    plan = get_plan(plan_id)
+    if plan is None:
+        return None
+    trip = get_trip(plan["Trip_ID"])
+    flight = get_flight(plan["Flight_ID"])
+    hotel = get_hotel(plan["Hotel_ID"])
+    activities = get_plan_activities(plan_id)
+    full_activity_list = []
+    for activity in activities:
+        a = get_activity(activity["Activity_ID"])
+        if a is None:
+            return None
+        a["Day_Number"] = activity["Day_Number"]
+        full_activity_list.append(a)
+
+    return {
+        "plan": plan,
+        "trip" : trip,
+        "flight" : flight,
+        "hotel" : hotel,
+        "activities" : full_activity_list
+    }
 
 # if __name__ == "__main__":
 #     init_db()
@@ -280,8 +312,8 @@ def get_plans(trip_id):
 #     )
 
 #     add_activity_to_plan(plan_id, activity_id, 1)
-#     print(get_trip(trip_id))
-#     print(get_plans(plan_id))
+#     print(get_plans(trip_id))
+#     print(get_plan_details(plan_id))
     
 
 
