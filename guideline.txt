@@ -58,3 +58,13 @@ Database Design
     - Plan_ID
     - Activity_ID
     - Day_Number
+
+Planner Design
+- 3 plan skeletons
+    - Plan Name (Cheapest, Balanced, Experienced-Focused)
+    - Total Cost
+    - Remaining Budget
+    - Selected Flight + Cost
+    - Selected Hotel + Cost
+    - Recommended Activity Organized by Day
+    - Generated Itinerary
