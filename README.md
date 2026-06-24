@@ -1,10 +1,10 @@
 # TripWise
 
-**TripWise** is a command-line trip planning tool that generates three personalized travel plans — Cheapest, Balanced, and Experience-Focused — tailored to your travel style, interests, and budget. No more jumping between dozens of websites to plan a trip.
+**TripWise** is a command-line trip planning tool that generates three personalized travel plans: Cheapest, Balanced, and Experience-Focused, tailored to your travel style, interests, and budget. No more jumping between dozens of websites to plan a trip.
 
 ## What makes TripWise different
 
-Most travel tools show you flights or hotels in isolation. TripWise is built around **you** — your travel style, your ranked interests, and your budget. Tell TripWise you're a foodie who prioritizes local cuisine over sightseeing, and every plan it generates reflects that. An adventurer gets a completely different set of recommendations for the same destination.
+Most travel tools show you flights or hotels in isolation. TripWise is built around you, your travel style, your ranked interests, and your budget. Tell TripWise you're a foodie who prioritizes local cuisine over sightseeing, and every plan it generates reflects that. An adventurer gets a completely different set of recommendations for the same destination.
 
 Three plans, one command — each one adapted to how you actually want to travel:
 - **$ Cheapest** — budget-friendly options, free and low-cost activities
