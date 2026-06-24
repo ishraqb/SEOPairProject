@@ -1,6 +1,6 @@
 # TripWise
 
-**TripWise** is a command-line trip planning tool that generates three personalized travel plans — Cheapest, Balanced, and Experience-Focused — tailored to your travel style, interests, and budget. No more jumping between 38 websites to plan a trip.
+**TripWise** is a command-line trip planning tool that generates three personalized travel plans — Cheapest, Balanced, and Experience-Focused — tailored to your travel style, interests, and budget. No more jumping between dozens of websites to plan a trip.
 
 ## What makes TripWise different
 
@@ -27,3 +27,52 @@ Three plans, one command — each one adapted to how you actually want to travel
 ## Setup
 
 1. Clone the repo:
+
+```
+git clone https://github.com/ishraqb/SEOPairProject.git
+cd SEOPairProject
+```
+
+2. Install dependencies:
+
+```
+pip install -r requirements.txt
+```
+
+3. Create a `.env` file in the project root (use `.env.example` as a template):
+
+```
+RAPIDAPI_KEY=your_rapidapi_key_here
+GEMINI_API_KEY=your_gemini_key_here
+```
+
+## Usage
+
+```
+python main.py --origin JFK --destination London --start 2026-08-01 --end 2026-08-05 --budget 3000 --travelers 1 --style foodie --interests food,culture,art
+```
+
+View past trips:
+
+```
+python main.py --history
+```
+
+### Arguments
+
+| Argument | Description | Example |
+|----------|-------------|---------|
+| `--origin` | Departure airport code | `JFK` |
+| `--destination` | Destination city | `London` |
+| `--start` | Departure date (YYYY-MM-DD) | `2026-08-01` |
+| `--end` | Return date (YYYY-MM-DD) | `2026-08-05` |
+| `--budget` | Total budget in USD | `3000` |
+| `--travelers` | Number of travelers | `1` |
+| `--style` | Your travel style — shapes every plan and activity recommendation | `foodie`, `adventure`, `relaxed` |
+| `--interests` | Ranked interests, highest to lowest priority | `food,culture,art` |
+| `--history` | View all past trips | — |
+
+## Team
+
+- Ishraq Basher — flights.py, hotels.py, main.py, CI setup
+- Yahir Flores — gemini.py, db.py, test_app.py
