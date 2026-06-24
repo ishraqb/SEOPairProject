@@ -1,5 +1,7 @@
 from google import genai
 from dotenv import load_dotenv
+from datetime import date
+
 import os
 
 load_dotenv()
@@ -26,7 +28,7 @@ def fallback_itinerary(plan, trip):
     Remaining Activity Budget: ${plan["activity_budget"]}
 
     Fallback Suggestion:
-    Use this plan's select flight and hotel, then use the remaining budget to choose activities that match your travel style and interests. 
+    Use this plan's selected flight and hotel, then use the remaining budget to choose activities that match your travel style and interests. 
 
     You can also wait for Gemini to work later.
     """
@@ -51,6 +53,8 @@ def build_prompt(plan, trip):
 
         Trip Information:
         Destination: {trip["Destination"]}
+        Start Date: {trip["Start_Date"]}
+        End Date: {trip["End_Date"]}
         Days: {trip["Days"]}
         Traveler Count: {trip["Traveler_Count"]}
         Traveler Style: {plan["travel_style"]}
@@ -116,8 +120,7 @@ def generate_itinerary(api_key, plan, trip):
     
     except Exception as error:
         print("Could not generate Gemini itinerary")
-        print(error)
-        return
+        return fallback_itinerary(plan, trip)
 
 def print_itinerary(itinerary):
     if itinerary is None:
@@ -125,42 +128,4 @@ def print_itinerary(itinerary):
         return
     
     print("\nGenerated Itinerary")
-    print(itinerary)
-
-# Manual Test
-if __name__ == "__main__":
-    trip = {
-        "Destination": "Tokyo",
-        "Days": 5,
-        "Budget": 2500,
-        "Traveler_Count": 2,
-        "Traveler_Style": "Foodie",
-        "Interests": "food,culture,nightlife"
-    }
-    plan = {
-        "plan_type": "Balanced",
-
-        "flight": {
-            "Airline": "Japan Airlines",
-            "Price": 550,
-            "Duration": "11h 30m"
-        },
-
-        "hotel": {
-            "Name": "Tokyo Central Hotel",
-            "Price_Per_Night": 140,
-            "Location": "Shinjuku"
-        },
-
-        "base_cost": 1250,
-        "activity_budget": 1250,
-
-        "activity_guidance": "Balanced or average costing activities matching the interests",
-
-        "travel_style": "Foodie",
-        "interests": "food,culture,nightlife",
-
-        "warning": None
-    }
-    itinerary = generate_itinerary(api_key, plan, trip)
     print(itinerary)

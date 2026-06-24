@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine, MetaData, Table, Column, select
-from sqlalchemy import Integer, String, Float, DateTime, ForeignKey, Text, func
+from sqlalchemy import Integer, String, Float, DateTime, ForeignKey, Text, func, Date
+from datetime import date
 
 engine = create_engine("sqlite:///tripwise.db", echo=True)
 metaData = MetaData()
@@ -10,6 +11,8 @@ TRIPS = Table(
     metaData,
     Column("ID", Integer, primary_key=True),
     Column("Destination", String(200), nullable=False),
+    Column("Start_Date", Date, nullable=False),
+    Column("End_Date", Date, nullable=False),
     Column("Days", Integer, nullable=False),
     Column("Budget", Float, nullable=False),
     Column("Traveler_Count", Integer, nullable=False),
@@ -74,9 +77,11 @@ def init_db():
     metaData.create_all(engine)
 
 """ Save trip to database. Returns trip_id """
-def save_trip(destination, days, budget, traveler_count, traveler_style, interests):
+def save_trip(destination, start_date, end_date, days, budget, traveler_count, traveler_style, interests):
     trip_data = {
         "Destination" : destination,
+        "Start_Date" : start_date,
+        "End_Date" : end_date,
         "Days" : days,
         "Budget" : budget,
         "Traveler_Count" : traveler_count,
@@ -268,52 +273,54 @@ def get_plan_details(plan_id):
         "activities" : full_activity_list
     }
 
-# if __name__ == "__main__":
-#     init_db()
+if __name__ == "__main__":
+    init_db()
 
-#     trip_id = save_trip(
-#         "Tokyo",
-#         5,
-#         2500,
-#         2,
-#         "Foodie",
-#         "food, culture"
-#     )
-#     flight_id = save_flight(
-#         trip_id,
-#         "Balanced",
-#         "Frontier",
-#         25.00,
-#         "12h 5min"
-#     )
-#     hotel_id = save_hotel(
-#         trip_id,
-#         "Balanced",
-#         "Marriott",
-#         55,
-#         "8.5/10",
-#         "Glendale"
-#     )
-#     plan_id = save_plan(
-#         trip_id,
-#         "Balanced",
-#         flight_id,
-#         hotel_id,
-#         275,
-#         225,
-#         "Day 1: Visit downtown. Day 2: Try local food 3: Explored and relax"
-#     )
-#     activity_id = save_activity(
-#         trip_id,
-#         "Walk to the park",
-#         0,
-#         "Adventure",
-#         "National park of the ducks"
-#     )
+    trip_id = save_trip(
+        "Tokyo",
+        date(2026, 5, 10),
+        date(2026, 7, 15),
+        5,
+        2500,
+        2,
+        "Foodie",
+        "food, culture"
+    )
+    flight_id = save_flight(
+        trip_id,
+        "Balanced",
+        "Frontier",
+        25.00,
+        "12h 5min"
+    )
+    hotel_id = save_hotel(
+        trip_id,
+        "Balanced",
+        "Marriott",
+        55,
+        "8.5/10",
+        "Glendale"
+    )
+    plan_id = save_plan(
+        trip_id,
+        "Balanced",
+        flight_id,
+        hotel_id,
+        275,
+        225,
+        "Day 1: Visit downtown. Day 2: Try local food 3: Explored and relax"
+    )
+    activity_id = save_activity(
+        trip_id,
+        "Walk to the park",
+        0,
+        "Adventure",
+        "National park of the ducks"
+    )
 
-#     add_activity_to_plan(plan_id, activity_id, 1)
-#     print(get_plans(trip_id))
-#     print(get_plan_details(plan_id))
+    add_activity_to_plan(plan_id, activity_id, 1)
+    print(get_plans(trip_id))
+    print(get_plan_details(plan_id))
     
 
 
