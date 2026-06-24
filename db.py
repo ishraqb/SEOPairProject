@@ -273,54 +273,6 @@ def get_plan_details(plan_id):
         "activities" : full_activity_list
     }
 
-if __name__ == "__main__":
-    init_db()
-
-    trip_id = save_trip(
-        "Tokyo",
-        date(2026, 5, 10),
-        date(2026, 7, 15),
-        5,
-        2500,
-        2,
-        "Foodie",
-        "food, culture"
-    )
-    flight_id = save_flight(
-        trip_id,
-        "Balanced",
-        "Frontier",
-        25.00,
-        "12h 5min"
-    )
-    hotel_id = save_hotel(
-        trip_id,
-        "Balanced",
-        "Marriott",
-        55,
-        "8.5/10",
-        "Glendale"
-    )
-    plan_id = save_plan(
-        trip_id,
-        "Balanced",
-        flight_id,
-        hotel_id,
-        275,
-        225,
-        "Day 1: Visit downtown. Day 2: Try local food 3: Explored and relax"
-    )
-    activity_id = save_activity(
-        trip_id,
-        "Walk to the park",
-        0,
-        "Adventure",
-        "National park of the ducks"
-    )
-
-    add_activity_to_plan(plan_id, activity_id, 1)
-    print(get_plans(trip_id))
-    print(get_plan_details(plan_id))
     
 
 
