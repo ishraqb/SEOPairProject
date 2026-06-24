@@ -1,4 +1,4 @@
-## Decides what goes into each plan
+# Decides what goes into each plan
 
 def build_all_plans(trip, flights, hotels):
     plans = {}

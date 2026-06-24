@@ -130,7 +130,7 @@ def main():
     "Traveler_Count": travelers,
     "Traveler_Style": style,
     "Interests": interests
-}
+    }
 
     print("\nBuilding your 3 personalized trip plans...\n")
     plans = planner_module.build_all_plans(trip_dict, norm_flights, norm_hotels)

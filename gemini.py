@@ -113,8 +113,8 @@ def generate_itinerary(api_key, plan, trip):
 
     try:
         response = client.models.generate_content(
-            model = "gemini-2.5-flash-lite",
-            contents = prompt
+            model="gemini-2.5-flash-lite",
+            contents=prompt
         )
         return response.text
     

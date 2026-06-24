@@ -41,10 +41,10 @@ def search_flights(api_key, origin, destination, date, travelers):
         airline = offer["segments"][0]["legs"][0]["carriersData"][0]["name"]
         dep = datetime.fromisoformat(offer["segments"][0]["departureTime"])
         arr = datetime.fromisoformat(offer["segments"][0]["arrivalTime"])
-        total_mins = int((arr-dep).total_seconds() / 60)
+        total_mins = int((arr - dep).total_seconds() / 60)
         hours = total_mins // 60
         mins = total_mins % 60
-        duration= str(hours) + "h " + str(mins) + "m"
+        duration = str(hours) + "h " + str(mins) + "m"
         return {"price": price, "airline": airline, "duration": duration}
 
     cheapest = extract(economy_offers[0])
