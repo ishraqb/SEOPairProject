@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, MetaData, Table, Column, select
 from sqlalchemy import Integer, String, Float, DateTime, ForeignKey, Text, func, Date
 from datetime import date
 
-engine = create_engine("sqlite:///tripwise.db", echo=True)
+engine = create_engine("sqlite:///tripwise.db", echo=False)
 metaData = MetaData()
 
 """ All Table Creations for SQLite """

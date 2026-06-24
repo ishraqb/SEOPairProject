@@ -119,7 +119,7 @@ def main():
     norm_flights = {tier: normalize_flight(f) for tier, f in raw_flights.items()}
     norm_hotels = {tier: normalize_hotel(h, destination) for tier, h in raw_hotels.items()}
 
-    trip_id = db.save_trip(destination, start_date, end_date, days, budget, travelers, style, interests)
+    trip_id = db.save_trip(destination, start_dt.date(), end_dt.date(), days, budget, travelers, style, interests)
 
     trip_dict = {
     "Destination": destination,
