@@ -6,7 +6,7 @@
 
 Most travel tools show you flights or hotels in isolation. TripWise is built around you, your travel style, your ranked interests, and your budget. Tell TripWise you're a foodie who prioritizes local cuisine over sightseeing, and every plan it generates reflects that. An adventurer gets a completely different set of recommendations for the same destination.
 
-Three plans, one command — each one adapted to how you actually want to travel:
+Three plans, one command, each one adapted to how you actually want to travel:
 - **$ Cheapest** — budget-friendly options, free and low-cost activities
 - **$$ Balanced** — mid-range flights and hotels, mix of paid and free experiences
 - **$$$ Experience-Focused** — business class flights, upscale hotels, premium activities
