@@ -10,14 +10,14 @@ import gemini as gemini_module
 import planner as planner_module
 
 def normalize_flight(f):
-    return{
+    return {
         "Price" : f["price"],
         "Airline": f["airline"],
         "Duration": f["duration"]
     }
 
 def normalize_hotel(h, destination):
-    return{
+    return {
         "Name": h["name"],
         "Price_Per_Night": h["price"],
         "Rating": h["rating"],
@@ -119,16 +119,18 @@ def main():
     norm_flights = {tier: normalize_flight(f) for tier, f in raw_flights.items()}
     norm_hotels = {tier: normalize_hotel(h, destination) for tier, h in raw_hotels.items()}
 
-    trip_id = db.save_trip(destination, days, budget, travelers, style, interests)
+    trip_id = db.save_trip(destination, start_date, end_date, days, budget, travelers, style, interests)
 
     trip_dict = {
-        "Destination": destination,
-        "Days": days,
-        "Budget": budget,
-        "Traveler_Count": travelers,
-        "Traveler_Style": style,
-        "Interests": interests
-    }
+    "Destination": destination,
+    "Start_Date": start_date,
+    "End_Date": end_date,
+    "Days": days,
+    "Budget": budget,
+    "Traveler_Count": travelers,
+    "Traveler_Style": style,
+    "Interests": interests
+}
 
     print("\nBuilding your 3 personalized trip plans...\n")
     plans = planner_module.build_all_plans(trip_dict, norm_flights, norm_hotels)
