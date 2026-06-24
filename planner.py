@@ -87,19 +87,3 @@ def calculate_base_cost(trip, flight, hotel):
 
 def is_within_budget(total_cost, budget):
     return total_cost <= budget
-
-trip = {"Budget": 2500, "Days": 5, "Traveler_Style" : "Foodie", "Interests": "hiking, beach"}
-
-flights = {
-    "cheapest": {"Price": 300},
-    "balanced": {"Price": 500},
-    "premium": {"Price": 900},
-}
-
-hotels = {
-    "cheapest": {"Price_Per_Night": 80},
-    "balanced": {"Price_Per_Night": 130},
-    "premium": {"Price_Per_Night": 250},
-}
-
-print(build_all_plans(trip, flights, hotels))

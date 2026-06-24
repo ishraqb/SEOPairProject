@@ -248,6 +248,14 @@ def get_plans(trip_id):
         for row in rows:
             res.append(dict(row._mapping))
         return res
+
+def get_all_trips():
+    #Returns all the trips in dictionary format
+    res = select(TRIPS).order_by(TRIPS.c.ID)
+    with engine.connect() as connection:
+        result = connection.execute(res)
+        rows = result.fetchall()
+        return [dict(row._mapping) for row in rows]
     
 def get_plan_details(plan_id):
     plan = get_plan(plan_id)
