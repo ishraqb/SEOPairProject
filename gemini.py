@@ -8,6 +8,7 @@ load_dotenv()
 
 api_key = os.getenv("GEMINI_API_KEY")
 
+# Backup itinerary response incase gemini is busy and can't create it
 def fallback_itinerary(plan, trip):
     return f"""
     Gemini itinerary unavailable.
@@ -33,6 +34,7 @@ def fallback_itinerary(plan, trip):
     You can also wait for Gemini to work later.
     """
 
+# Fills in the prompt with the necessary details for the trip to the send to gemini
 def build_prompt(plan, trip):
     flight = plan["flight"]
     hotel = plan["hotel"]
@@ -49,7 +51,7 @@ def build_prompt(plan, trip):
         - Activity budget
         - Plan type
 
-        Use only the information given below to generate a concise but detailed and realistic day-to-day itinerary.
+        Use the information below as the source of truth.
 
         Trip Information:
         Destination: {trip["Destination"]}
@@ -58,7 +60,7 @@ def build_prompt(plan, trip):
         Days: {trip["Days"]}
         Traveler Count: {trip["Traveler_Count"]}
         Traveler Style: {plan["travel_style"]}
-        Interests: {plan["interests"]}
+        Ranked Interests: {plan["interests"]}
         Plan Type: {plan["plan_type"]}
 
         Flight Information:
@@ -80,30 +82,88 @@ def build_prompt(plan, trip):
         {plan["activity_guidance"]}
 
         Instructions:
-        Generate a {trip["Days"]}-day itinerary.
+        Generate exactly ONE itinerary for the selected plan.
 
         Prioritize activities that match:
         1. Traveler Style
         2. Ranked Interests
 
-        Keep all suggested activities within the remaining activity budget.
+        Follow this format:
 
-        For each day provide this structure:
-        - Morning Activity
-        - Afternoon Activity
-        - Evening Activity
-        - Suggested Food Experience
+        =======================================
+        {plan["plan_type"]} Plan
 
-        At the end provide:
-        - Estimated activity total spending
-        - How this itinerary matches the traveler's style and interests
+        Destination: {trip["Destination"]}
+        Dates: {trip["Start_Date"].strftime("%b %d, %Y")} to {trip["End_Date"].strftime("%b %d, %Y")}
 
-        Do not invent new flight or hotel information.
-        Make sure this itinerary matches the plan type: {plan["plan_type"]}
-        Make sure all itineraries are different and match the traveler.
+        Flight
+        • Airline • Price • Duration
+
+        Hotel
+        • Name • Location
+        • Price per Night
+
+        Budget
+        Total: ${trip["Budget"]}
+        Base Cost (Flight + Hotel): ${plan["base_cost"]}
+        Activity Budget: ${plan["activity_budget"]}
+
+        ---------------------------------------
+
+        Daily Itinerary
+
+        Day 1
+
+        Morning:
+        ...
+
+        Afternoon:
+        ...
+
+        Evening:
+        ...
+
+        Food Recommendation:
+        ...
+
+        Estimated Daily Cost:
+        $...
+        
+        ---------------------------------------
+
+        (Repeat this structure until Day {trip["Days"]}.)
+
+        Trip Summary:
+
+        Estimated Total Activity Spending: $...
+        Estimated Remaining Budget: $...
+
+        Why this itinerary matches the traveler's style and ranked interests:
+        2-3 concise sentences explaining how it matches the traveler style and ranked interest
+
+        =======================================
+
+        Requirements:
+        - Keep each activity description to 1-2 concise sentences that clearly describe the experience
+        - Activities must be realistic for the destination
+        - Activities should be geographically sensible
+        - Prioritize the ranked interests in order
+        - Activities should reflect the traveler's style
+        - Include activity admission, local transportation, and food in cost estimates
+        - Use realistic destination specific prices
+        - Keep total activity spending within the remaining activity budget
+        - For Cheapest plans, focus on budget-friendly activities
+        - For Balanced plans, mix affordable and premium experiences
+        - For Experience-Focused plans, prioritize memorable experiences while staying within budget
+        - Do not invent or modify any flight information
+        - Do not invent or modify any hotel information
+        - Make the response easy to read in a command-line terminal
+        - Avoid long paragraphs
+        - Return ONLY the itinerary in the format above
         """
     return prompt
 
+# Send Gemini all the info to create the itinerary
 def generate_itinerary(api_key, plan, trip):
     if api_key is None:
         return fallback_itinerary(plan, trip)
@@ -122,6 +182,7 @@ def generate_itinerary(api_key, plan, trip):
         print("Could not generate Gemini itinerary")
         return fallback_itinerary(plan, trip)
 
+# Print the intinerary, has a check for None
 def print_itinerary(itinerary):
     if itinerary is None:
         print("No itinerary is available")
@@ -129,3 +190,4 @@ def print_itinerary(itinerary):
     
     print("\nGenerated Itinerary")
     print(itinerary)
+
