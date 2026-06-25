@@ -198,7 +198,10 @@ def main():
         "Interests": interests
     }
 
-    print(CYAN + BOLD + "\nBuilding your 3 personalized trip plans...\n" + RESET)
+    print(
+        CYAN + BOLD + "\nBuilding your 3 personalized trip plans...\n" 
+        + RESET
+    )
     plans = planner_module.build_all_plans(trip_dict, norm_flights, norm_hotels)
 
     for plan_name, plan in plans.items():
