@@ -1,14 +1,18 @@
 import requests
 from datetime import datetime
 
+
 def search_hotels(api_key, destination, checkin, checkout, travelers):
-    
+
     headers = {
         "x-rapidapi-key": api_key,
         "x-rapidapi-host": "booking-com15.p.rapidapi.com"
     }
 
-    dest_url = "https://booking-com15.p.rapidapi.com/api/v1/hotels/searchDestination"
+    dest_url = (
+        "https://booking-com15.p.rapidapi.com/"
+        "api/v1/hotels/searchDestination"
+    )
     dest_params = {"query": destination}
     dest_response = requests.get(dest_url, headers=headers, params=dest_params)
 
@@ -21,11 +25,14 @@ def search_hotels(api_key, destination, checkin, checkout, travelers):
     if not results:
         print("No destination found for: " + destination)
         return None
-    
+
     dest_id = results[0].get("dest_id", "")
     dest_type = results[0].get("dest_type", "city")
 
-    hotel_url = "https://booking-com15.p.rapidapi.com/api/v1/hotels/searchHotels"
+    hotel_url = (
+        "https://booking-com15.p.rapidapi.com/"
+        "api/v1/hotels/searchHotels"
+    )
     hotel_params = {
         "dest_id": dest_id,
         "search_type": dest_type,
@@ -36,7 +43,9 @@ def search_hotels(api_key, destination, checkin, checkout, travelers):
         "currency_code": "USD"
     }
 
-    hotel_response = requests.get(hotel_url, headers=headers, params=hotel_params)
+    hotel_response = requests.get(
+        hotel_url, headers=headers, params=hotel_params
+    )
 
     if hotel_response.status_code != 200:
         print("Could not fetch hotel listings.")
@@ -48,18 +57,24 @@ def search_hotels(api_key, destination, checkin, checkout, travelers):
     if not hotels:
         print("No hotels found for that destination")
         return None
-    
+
     hotels = [
         h for h in hotels
         if h.get("property", {}).get("priceBreakdown", {}).get("grossPrice")
     ]
 
-    hotels.sort(key=lambda x: x["property"]["priceBreakdown"]["grossPrice"]["value"])
+    hotels.sort(
+        key=lambda x: x["property"]["priceBreakdown"]["grossPrice"]["value"]
+    )
 
     def extract(hotel):
         prop = hotel.get("property", {})
         name = prop.get("name", "Unknown Hotel")
-        price = prop.get("priceBreakdown", {}).get("grossPrice", {}).get("value", "N/A")
+        price = (
+            prop.get("priceBreakdown", {})
+            .get("grossPrice", {})
+            .get("value", "N/A")
+        )
         rating = prop.get("reviewScore", "N/A")
         return {"name": name, "price": round(price), "rating": rating}
 
@@ -72,6 +87,7 @@ def search_hotels(api_key, destination, checkin, checkout, travelers):
         "balanced": balanced,
         "premium": premium
     }
+
 
 def print_hotels(hotels):
     if hotels is None:

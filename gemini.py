@@ -8,8 +8,10 @@ load_dotenv()
 
 api_key = os.getenv("GEMINI_API_KEY")
 
-# Backup itinerary response incase gemini is busy and can't create it
+
 def fallback_itinerary(plan, trip):
+    # Backup itinerary response incase gemini is busy and can't create it
+
     return f"""
     Gemini itinerary unavailable.
 
@@ -29,19 +31,25 @@ def fallback_itinerary(plan, trip):
     Remaining Activity Budget: ${plan["activity_budget"]}
 
     Fallback Suggestion:
-    Use this plan's selected flight and hotel, then use the remaining budget to choose activities that match your travel style and interests. 
+    Use this plan's selected flight and hotel
+    Then use the remaining budget to choose
+    activities that match your travel style and interests
 
     You can also wait for Gemini to work later.
     """
 
-# Fills in the prompt with the necessary details for the trip to the send to gemini
+
 def build_prompt(plan, trip):
+    # Builds prompt with the details for the trip to the send to gemini
+
     flight = plan["flight"]
     hotel = plan["hotel"]
+    start_date = trip["Start_Date"].strftime("%b %d, %Y")
+    end_date = trip["End_Date"].strftime("%b %d, %Y")
 
     prompt = f"""
-        You are a travel itinerary planner. 
-        
+        You are a travel itinerary planner.
+
         The flight, hotel, and budget decisions have already been made.
 
         DO NOT change:
@@ -94,7 +102,7 @@ def build_prompt(plan, trip):
         {plan["plan_type"]} Plan
 
         Destination: {trip["Destination"]}
-        Dates: {trip["Start_Date"].strftime("%b %d, %Y")} to {trip["End_Date"].strftime("%b %d, %Y")}'
+        Dates: {start_date} to {end_date}
 
         (Note: Please format the dates above like "Jun 25, 2026")
 
@@ -130,7 +138,7 @@ def build_prompt(plan, trip):
 
         Estimated Daily Cost:
         $...
-        
+
         ---------------------------------------
 
         (Repeat this structure until Day {trip["Days"]}.)
@@ -141,22 +149,26 @@ def build_prompt(plan, trip):
         Estimated Remaining Budget: $...
 
         Why this itinerary matches the traveler's style and ranked interests:
-        2-3 concise sentences explaining how it matches the traveler style and ranked interest
+        2-3 concise sentences explaining how it matches the
+        traveler style and ranked interest
 
         =======================================
 
         Requirements:
-        - Keep each activity description to 1-2 concise sentences that clearly describe the experience
+        - Keep each activity description to 1-2 concise sentences that
+        clearly describe the experience
         - Activities must be realistic for the destination
         - Activities should be geographically sensible
         - Prioritize the ranked interests in order
         - Activities should reflect the traveler's style
-        - Include activity admission, local transportation, and food in cost estimates
+        - Include activity admission, local transportation,
+        and food in cost estimates
         - Use realistic destination specific prices
         - Keep total activity spending within the remaining activity budget
         - For Cheapest plans, focus on budget-friendly activities
         - For Balanced plans, mix affordable and premium experiences
-        - For Experience-Focused plans, prioritize memorable experiences while staying within budget
+        - For Experience-Focused plans, prioritize memorable experiences
+        while staying within budget
         - Do not invent or modify any flight information
         - Do not invent or modify any hotel information
         - Make the response easy to read in a command-line terminal
@@ -165,11 +177,13 @@ def build_prompt(plan, trip):
         """
     return prompt
 
-# Send Gemini all the info to create the itinerary
+
 def generate_itinerary(api_key, plan, trip):
+    # Send Gemini all the info to create the itinerary
+
     if api_key is None:
         return fallback_itinerary(plan, trip)
-    
+
     client = genai.Client(api_key=api_key)
     prompt = build_prompt(plan, trip)
 
@@ -179,17 +193,18 @@ def generate_itinerary(api_key, plan, trip):
             contents=prompt
         )
         return response.text
-    
+
     except Exception as error:
         print("Could not generate Gemini itinerary")
         return fallback_itinerary(plan, trip)
 
-# Print the intinerary, has a check for None
+
 def print_itinerary(itinerary):
+    # Print the intinerary, has a check for None
+
     if itinerary is None:
         print("No itinerary is available")
         return
-    
+
     print("\nGenerated Itinerary")
     print(itinerary)
-
