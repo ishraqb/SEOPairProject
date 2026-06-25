@@ -17,6 +17,7 @@ GREEN = "\033[92m"
 YELLOW = "\033[93m"
 RED = "\033[91m"
 WHITE = "\033[97m"
+MAGENTA = "\033[95m"
 
 
 def normalize_flight(f):
@@ -112,9 +113,9 @@ def main():
 
     print(CYAN + BOLD + "\nWelcome to TripWise!" + RESET)
     print(WHITE + "=" * 40 + RESET)
-    print(WHITE + "Plan your perfect trip in seconds." + RESET)
+    print(MAGENTA + "Plan your perfect trip in seconds." + RESET)
     print(
-        WHITE +
+        MAGENTA +
         "Tell us where you're going and we'll build 3 personalized" +
         " plans — cheapest, balanced, and experience-focused." +
         RESET
@@ -188,8 +189,8 @@ def main():
 
     trip_dict = {
         "Destination": destination,
-        "Start_Date": start_date,
-        "End_Date": end_date,
+        "Start_Date": start_dt.date(),
+        "End_Date": end_dt.date(),
         "Days": days,
         "Budget": budget,
         "Traveler_Count": travelers,
