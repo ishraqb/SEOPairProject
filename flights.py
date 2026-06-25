@@ -1,9 +1,10 @@
 import requests
 from datetime import datetime
 
+
 def search_flights(api_key, origin, destination, date, travelers):
     url = "https://booking-com15.p.rapidapi.com/api/v1/flights/searchFlights"
-    
+
     headers = {
         "x-rapidapi-key": api_key,
         "x-rapidapi-host": "booking-com15.p.rapidapi.com"
@@ -33,8 +34,12 @@ def search_flights(api_key, origin, destination, date, travelers):
         print("No flights found for that route.")
         return None
 
-    economy_offers = [offer for offer in economy_offers if offer.get("priceBreakdown")]
-    economy_offers.sort(key=lambda x: x["priceBreakdown"]["totalRounded"]["units"])
+    economy_offers = [
+        offer for offer in economy_offers if offer.get("priceBreakdown")
+    ]
+    economy_offers.sort(
+        key=lambda x: x["priceBreakdown"]["totalRounded"]["units"]
+    )
 
     def extract(offer):
         price = offer["priceBreakdown"]["totalRounded"]["units"]
@@ -51,17 +56,22 @@ def search_flights(api_key, origin, destination, date, travelers):
     balanced = extract(economy_offers[len(economy_offers) // 2])
 
     if business_offers:
-        business_offers = [offer for offer in business_offers if offer.get("priceBreakdown")]
-        business_offers.sort(key=lambda x: x["priceBreakdown"]["totalRounded"]["units"])
+        business_offers = [
+            offer for offer in business_offers if offer.get("priceBreakdown")
+        ]
+        business_offers.sort(
+            key=lambda x: x["priceBreakdown"]["totalRounded"]["units"]
+        )
         premium = extract(business_offers[0])
     else:
         premium = extract(economy_offers[-1])
-    
+
     return {
         "cheapest": cheapest,
         "balanced": balanced,
         "premium": premium
     }
+
 
 def print_flights(flights):
     if flights is None:
