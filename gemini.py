@@ -13,7 +13,7 @@ def fallback_itinerary(plan, trip):
     # Backup itinerary response incase gemini is busy and can't create it
 
     return f"""
-    Gemini itinerary unavailable.
+    Server itinerary unavailable.
 
     Plan Type: {plan["plan_type"]}
     Destination: {trip["Destination"]}
@@ -35,7 +35,7 @@ def fallback_itinerary(plan, trip):
     Then use the remaining budget to choose
     activities that match your travel style and interests
 
-    You can also wait for Gemini to work later.
+    You can also wait for server to work later.
     """
 
 
@@ -195,7 +195,7 @@ def generate_itinerary(api_key, plan, trip):
         return response.text
 
     except Exception as error:
-        print("Could not generate Gemini itinerary")
+        print("Could not generate server itinerary")
         return fallback_itinerary(plan, trip)
 
 
