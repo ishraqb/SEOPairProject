@@ -1,4 +1,5 @@
-import argparse
+import re
+import sys
 import os
 from datetime import datetime
 from dotenv import load_dotenv
@@ -9,12 +10,22 @@ import hotels as hotel_module
 import gemini as gemini_module
 import planner as planner_module
 
+RESET = "\033[0m"
+BOLD = "\033[1m"
+CYAN = "\033[96m"
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+RED = "\033[91m"
+WHITE = "\033[97m"
+
+
 def normalize_flight(f):
     return {
-        "Price" : f["price"],
+        "Price": f["price"],
         "Airline": f["airline"],
         "Duration": f["duration"]
     }
+
 
 def normalize_hotel(h, destination):
     return {
@@ -24,115 +35,152 @@ def normalize_hotel(h, destination):
         "Location": destination
     }
 
+
+def format_markdown(text):
+    text = re.sub(r'\*\*(.*?)\*\*', BOLD + r'\1' + RESET, text)
+    return text
+
+
 def show_history():
     trips = db.get_all_trips()
     if not trips:
-        print("No past trips found.")
+        print(YELLOW + "No past trips found." + RESET)
         return
-    print("Trip History")
+    print(CYAN + BOLD + "\nTrip History" + RESET)
+    print(WHITE + "=" * 40 + RESET)
     for trip in trips:
-        print("\nTrip #" + str(trip["ID"]) + ": " + trip["Destination"])
-        print("  Days:      " + str(trip["Days"]))
-        print("  Budget:    $" + str(trip["Budget"]))
-        print("  Style:     " + trip["Traveler_Style"])
-        print("  Interests: " + trip["Interests"])
+        print(
+            CYAN + "\nTrip #" + str(trip["ID"]) + ": " +
+            trip["Destination"] + RESET
+        )
+        print(
+            GREEN + "  Dates:     " + RESET +
+            str(trip["Start_Date"]) + " to " + str(trip["End_Date"])
+        )
+        print(GREEN + "  Budget:    " + RESET + "$" + str(trip["Budget"]))
+        print(GREEN + "  Style:     " + RESET + trip["Traveler_Style"])
+        print(GREEN + "  Interests: " + RESET + trip["Interests"])
+
 
 def print_plan(plan_name, plan, itinerary):
-    print("\n" + "=" * 50)
-    print("  " + plan_name + " Plan")
-    print("=" * 50)
+    print(CYAN + BOLD + "\n" + "=" * 50 + RESET)
+    print(CYAN + BOLD + "  " + plan_name + " Plan" + RESET)
+    print(CYAN + BOLD + "=" * 50 + RESET)
     if plan.get("warning"):
-        print("  WARNING: " + plan["warning"])
-    print("\nFlight:")
-    print("  Airline:  " + plan["flight"]["Airline"])
-    print("  Price:    $" + str(plan["flight"]["Price"]))
-    print("  Duration: " + plan["flight"]["Duration"])
-    print("\nHotel:")
-    print("  Name:          " + plan["hotel"]["Name"])
-    print("  Price/Night:   $" + str(plan["hotel"]["Price_Per_Night"]))
-    print("  Rating:        " + str(plan["hotel"]["Rating"]))
-    print("\nCosts:")
-    print("  Base Cost (flight + hotel): $" + str(plan["base_cost"]))
-    print("  Remaining Activity Budget:  $" + str(plan["activity_budget"]))
-    print("\nItinerary:")
-    print(itinerary)
-        
+        print(RED + "  WARNING: " + plan["warning"] + RESET)
+    print(CYAN + "\nFlight:" + RESET)
+    print(GREEN + "  Airline:  " + RESET + plan["flight"]["Airline"])
+    print(GREEN + "  Price:    " + RESET + "$" + str(plan["flight"]["Price"]))
+    print(GREEN + "  Duration: " + RESET + plan["flight"]["Duration"])
+    print(CYAN + "\nHotel:" + RESET)
+    print(GREEN + "  Name:          " + RESET + plan["hotel"]["Name"])
+    print(
+        GREEN + "  Price/Night:   " + RESET +
+        "$" + str(plan["hotel"]["Price_Per_Night"])
+    )
+    print(GREEN + "  Rating:        " + RESET + str(plan["hotel"]["Rating"]))
+    print(CYAN + "\nCosts:" + RESET)
+    print(
+        GREEN + "  Base Cost (flight + hotel): " + RESET +
+        "$" + str(plan["base_cost"])
+    )
+    print(
+        GREEN + "  Remaining Activity Budget:  " + RESET +
+        "$" + str(plan["activity_budget"])
+    )
+    print(CYAN + "\nItinerary:" + RESET)
+    print(format_markdown(itinerary))
+
+
 def main():
     load_dotenv()
     api_key = os.getenv("RAPIDAPI_KEY")
     gemini_key = os.getenv("GEMINI_API_KEY")
 
-    parser = argparse.ArgumentParser(description="TripWise - Smart Trip Planner")
-    parser.add_argument("--origin", help="Origin airport code (e.g. JFK)")
-    parser.add_argument("--destination", help="Destination city (e.g. London)")
-    parser.add_argument("--start", help="Departure date (YYYY-MM-DD)")
-    parser.add_argument("--end", help="Return date (YYYY-MM-DD)")
-    parser.add_argument("--budget", type=float, help="Total budget in USD")
-    parser.add_argument("--travelers", type=int, default=1, help="Number of travelers")
-    parser.add_argument("--style", help="Travel style: foodie, adventure, or relaxed")
-    parser.add_argument("--interests", help="Ranked interests, comma-separated (e.g. food, culture, art)")
-    parser.add_argument("--history", action="store_true", help="View all past trips")
-
-    args = parser.parse_args()
     db.init_db()
-    
-    if args.history:
+
+    if "--history" in sys.argv:
         show_history()
         return
-    
-    required = ["origin", "destination", "start", "end", "budget", "style", "interests"]
-    for req in required:
-        if getattr(args, req) is None:
-            print("Error: --" + req + " is required")
-            parser.print_help()
-            return
-    
-    origin = args.origin.upper()
-    destination = args.destination
-    start_date = args.start
-    end_date = args.end
-    budget = args.budget
-    travelers = args.travelers
-    style = args.style
-    interests = args.interests
+
+    print(CYAN + BOLD + "\nWelcome to TripWise!" + RESET)
+    print(WHITE + "=" * 40 + RESET)
+
+    origin = input(YELLOW + "Departure airport code (e.g. JFK): " + RESET)
+    origin = origin.strip().upper()
+    destination = input(
+        YELLOW + "Destination airport code (e.g. LHR): " + RESET
+    )
+    destination = destination.strip().upper()
+    start_date = input(
+        YELLOW + "Departure date (YYYY-MM-DD): " + RESET
+    ).strip()
+    end_date = input(
+        YELLOW + "Return date (YYYY-MM-DD): " + RESET
+    ).strip()
+    budget = float(input(
+        YELLOW + "Total budget in USD: " + RESET
+    ).strip())
+    travelers = int(input(
+        YELLOW + "Number of travelers: " + RESET
+    ).strip())
+    print(YELLOW + "Travel styles: foodie, adventure, relaxed" + RESET)
+    style = input(YELLOW + "Your travel style: " + RESET).strip()
+    interests = input(
+        YELLOW + "Interests, comma-separated (e.g. food,culture,art): " + RESET
+    ).strip()
 
     start_dt = datetime.strptime(start_date, "%Y-%m-%d")
     end_dt = datetime.strptime(end_date, "%Y-%m-%d")
     days = (end_dt - start_dt).days
 
     if days <= 0:
-        print("Error: --end must be after --start.")
+        print(RED + "Error: return date must be after departure date." + RESET)
         return
-    
-    print("\nSearching flights from " + origin + " to " + destination + "...")
-    raw_flights = flight_module.search_flights(api_key, origin, destination, start_date, travelers)
+
+    print(
+        CYAN + "\nSearching flights from " + origin +
+        " to " + destination + "..." + RESET
+    )
+    raw_flights = flight_module.search_flights(
+        api_key, origin, destination, start_date, travelers
+    )
     if raw_flights is None:
-        print("Could not retrieve flight data. Exiting.")
+        print(RED + "Could not retrieve flight data. Exiting." + RESET)
         return
 
-    print("Searching hotels in " + destination + "...")
-    raw_hotels = hotel_module.search_hotels(api_key, destination, start_date, end_date, travelers)
+    print(CYAN + "Searching hotels in " + destination + "..." + RESET)
+    raw_hotels = hotel_module.search_hotels(
+        api_key, destination, start_date, end_date, travelers
+    )
     if raw_hotels is None:
-        print("Could not retrieve hotel data. Exiting.")
+        print(RED + "Could not retrieve hotel data. Exiting." + RESET)
         return
 
-    norm_flights = {tier: normalize_flight(f) for tier, f in raw_flights.items()}
-    norm_hotels = {tier: normalize_hotel(h, destination) for tier, h in raw_hotels.items()}
-
-    trip_id = db.save_trip(destination, start_dt.date(), end_dt.date(), days, budget, travelers, style, interests)
-
-    trip_dict = {
-    "Destination": destination,
-    "Start_Date": start_date,
-    "End_Date": end_date,
-    "Days": days,
-    "Budget": budget,
-    "Traveler_Count": travelers,
-    "Traveler_Style": style,
-    "Interests": interests
+    norm_flights = {
+        tier: normalize_flight(f) for tier, f in raw_flights.items()
+    }
+    norm_hotels = {
+        tier: normalize_hotel(h, destination) for tier, h in raw_hotels.items()
     }
 
-    print("\nBuilding your 3 personalized trip plans...\n")
+    trip_id = db.save_trip(
+        destination, start_dt.date(), end_dt.date(),
+        days, budget, travelers, style, interests
+    )
+
+    trip_dict = {
+        "Destination": destination,
+        "Start_Date": start_date,
+        "End_Date": end_date,
+        "Days": days,
+        "Budget": budget,
+        "Traveler_Count": travelers,
+        "Traveler_Style": style,
+        "Interests": interests
+    }
+
+    print(CYAN + BOLD + "\nBuilding your 3 personalized trip plans...\n" + RESET)
     plans = planner_module.build_all_plans(trip_dict, norm_flights, norm_hotels)
 
     for plan_name, plan in plans.items():
@@ -145,7 +193,8 @@ def main():
         )
         hotel_id = db.save_hotel(
             trip_id, plan["plan_type"],
-            hotel["Name"], hotel["Price_Per_Night"], hotel["Rating"], hotel["Location"]
+            hotel["Name"], hotel["Price_Per_Night"],
+            hotel["Rating"], hotel["Location"]
         )
 
         itinerary = gemini_module.generate_itinerary(gemini_key, plan, trip_dict)
@@ -159,10 +208,9 @@ def main():
 
         print_plan(plan_name, plan, itinerary)
 
-    print("\nAll 3 plans saved. Trip #" + str(trip_id))
-    print("Run with --history to view past trips.")
+    print(CYAN + BOLD + "\nAll 3 plans saved. Trip #" + str(trip_id) + RESET)
+    print(WHITE + "Run 'python main.py --history' to view past trips." + RESET)
 
 
 if __name__ == "__main__":
     main()
-    
