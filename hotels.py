@@ -67,7 +67,6 @@ def search_hotels(api_key, destination, checkin, checkout, travelers):
     balanced = extract(hotels[len(hotels) // 2])
     premium = extract(hotels[-1])
 
-    
     return {
         "cheapest": cheapest,
         "balanced": balanced,
