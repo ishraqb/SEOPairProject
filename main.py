@@ -209,7 +209,7 @@ def main():
         print_plan(plan_name, plan, itinerary)
 
     print(CYAN + BOLD + "\nAll 3 plans saved. Trip #" + str(trip_id) + RESET)
-    print(WHITE + "Run 'python main.py --history' to view past trips." + RESET)
+    print(WHITE + "Run 'TripWise --history' to view past trips." + RESET)
 
 
 if __name__ == "__main__":
