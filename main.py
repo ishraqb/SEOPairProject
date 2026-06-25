@@ -1,4 +1,4 @@
-import argparse
+import sys
 import os
 from datetime import datetime
 from dotenv import load_dotenv
@@ -29,10 +29,11 @@ def show_history():
     if not trips:
         print("No past trips found.")
         return
-    print("Trip History")
+    print("\nTrip History")
+    print("=" * 40)
     for trip in trips:
         print("\nTrip #" + str(trip["ID"]) + ": " + trip["Destination"])
-        print("  Days:      " + str(trip["Days"]))
+        print("  Dates:     " + str(trip["Start_Date"]) + " to " + str(trip["End_Date"]))
         print("  Budget:    $" + str(trip["Budget"]))
         print("  Style:     " + trip["Traveler_Style"])
         print("  Interests: " + trip["Interests"])
@@ -61,108 +62,98 @@ def main():
     load_dotenv()
     api_key = os.getenv("RAPIDAPI_KEY")
     gemini_key = os.getenv("GEMINI_API_KEY")
-
-    parser = argparse.ArgumentParser(description="TripWise - Smart Trip Planner")
-    parser.add_argument("--origin", help="Origin airport code (e.g. JFK)")
-    parser.add_argument("--destination", help="Destination city (e.g. London)")
-    parser.add_argument("--start", help="Departure date (YYYY-MM-DD)")
-    parser.add_argument("--end", help="Return date (YYYY-MM-DD)")
-    parser.add_argument("--budget", type=float, help="Total budget in USD")
-    parser.add_argument("--travelers", type=int, default=1, help="Number of travelers")
-    parser.add_argument("--style", help="Travel style: foodie, adventure, or relaxed")
-    parser.add_argument("--interests", help="Ranked interests, comma-separated (e.g. food, culture, art)")
-    parser.add_argument("--history", action="store_true", help="View all past trips")
-
-    args = parser.parse_args()
     db.init_db()
-    
-    if args.history:
+    if "--history" in sys.argv:
         show_history()
         return
     
-    required = ["origin", "destination", "start", "end", "budget", "style", "interests"]
-    for req in required:
-        if getattr(args, req) is None:
-            print("Error: --" + req + " is required")
-            parser.print_help()
-            return
-    
-    origin = args.origin.upper()
-    destination = args.destination
-    start_date = args.start
-    end_date = args.end
-    budget = args.budget
-    travelers = args.travelers
-    style = args.style
-    interests = args.interests
-
+    print("\nWelcome to TripWise!")
+    print("=" * 40)
+    origin = input("Departure airport code (e.g. JFK): ").strip().upper()
+    destination = input("Destination airport code (e.g. LHR): ").strip().upper()
+    start_date = input("Departure date (YYYY-MM-DD): ").strip()
+    end_date = input("Return date (YYYY-MM-DD): ").strip()
+    budget = float(input("Total budget in USD: ").strip())
+    travelers = int(input("Number of travelers: ").strip())
+    print("Travel styles: foodie, adventure, relaxed")
+    style = input("Your travel style: ").strip()
+    interests = input("Interests, comma-separated (e.g. food,culture,art): ").strip()
     start_dt = datetime.strptime(start_date, "%Y-%m-%d")
     end_dt = datetime.strptime(end_date, "%Y-%m-%d")
     days = (end_dt - start_dt).days
-
+    
     if days <= 0:
-        print("Error: --end must be after --start.")
+        print("Error: return date must be after departure date.")
         return
     
     print("\nSearching flights from " + origin + " to " + destination + "...")
-    raw_flights = flight_module.search_flights(api_key, origin, destination, start_date, travelers)
+    raw_flights = flight_module.search_flights(
+        api_key, origin, destination, start_date, travelers
+    )
+    
     if raw_flights is None:
         print("Could not retrieve flight data. Exiting.")
         return
-
+        
     print("Searching hotels in " + destination + "...")
-    raw_hotels = hotel_module.search_hotels(api_key, destination, start_date, end_date, travelers)
+    raw_hotels = hotel_module.search_hotels(
+        api_key, destination, start_date, end_date, travelers
+    )
+    
     if raw_hotels is None:
         print("Could not retrieve hotel data. Exiting.")
         return
-
-    norm_flights = {tier: normalize_flight(f) for tier, f in raw_flights.items()}
-    norm_hotels = {tier: normalize_hotel(h, destination) for tier, h in raw_hotels.items()}
-
-    trip_id = db.save_trip(destination, start_dt.date(), end_dt.date(), days, budget, travelers, style, interests)
-
-    trip_dict = {
-    "Destination": destination,
-    "Start_Date": start_date,
-    "End_Date": end_date,
-    "Days": days,
-    "Budget": budget,
-    "Traveler_Count": travelers,
-    "Traveler_Style": style,
-    "Interests": interests
+        
+    norm_flights = {
+        tier: normalize_flight(f) for tier, f in raw_flights.items()
     }
-
+    
+    norm_hotels = {
+        tier: normalize_hotel(h, destination) for tier, h in raw_hotels.items()
+    }
+    
+    trip_id = db.save_trip(
+        destination, start_dt.date(), end_dt.date(),
+        days, budget, travelers, style, interests
+    )
+    
+    trip_dict = {
+        "Destination": destination,
+        "Start_Date": start_date,
+        "End_Date": end_date,
+        "Days": days,
+        "Budget": budget,
+        "Traveler_Count": travelers,
+        "Traveler_Style": style,
+        "Interests": interests
+    }
+    
     print("\nBuilding your 3 personalized trip plans...\n")
     plans = planner_module.build_all_plans(trip_dict, norm_flights, norm_hotels)
-
+    
     for plan_name, plan in plans.items():
         flight = plan["flight"]
         hotel = plan["hotel"]
-
         flight_id = db.save_flight(
             trip_id, plan["plan_type"],
             flight["Airline"], flight["Price"], flight["Duration"]
         )
         hotel_id = db.save_hotel(
             trip_id, plan["plan_type"],
-            hotel["Name"], hotel["Price_Per_Night"], hotel["Rating"], hotel["Location"]
+            hotel["Name"], hotel["Price_Per_Night"],
+            hotel["Rating"], hotel["Location"]
         )
-
         itinerary = gemini_module.generate_itinerary(gemini_key, plan, trip_dict)
         if itinerary is None:
             itinerary = gemini_module.fallback_itinerary(plan, trip_dict)
-
         db.save_plan(
             trip_id, plan["plan_type"], flight_id, hotel_id,
             plan["base_cost"], plan["activity_budget"], itinerary
         )
-
         print_plan(plan_name, plan, itinerary)
-
+        
     print("\nAll 3 plans saved. Trip #" + str(trip_id))
-    print("Run with --history to view past trips.")
-
+    print("Run 'python main.py --history' to view past trips.")
 
 if __name__ == "__main__":
     main()
-    
