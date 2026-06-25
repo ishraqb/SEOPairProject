@@ -1,6 +1,6 @@
 from google import genai
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import date, datetime
 
 import os
 
@@ -94,7 +94,8 @@ def build_prompt(plan, trip):
         {plan["plan_type"]} Plan
 
         Destination: {trip["Destination"]}
-        Dates: {trip["Start_Date"]} to {trip["End_Date"]}'
+        Dates: {trip["Start_Date"].strftime("%b %d, %Y")} to {trip["End_Date"].strftime("%b %d, %Y")}'
+
         (Note: Please format the dates above like "Jun 25, 2026")
 
         Flight
