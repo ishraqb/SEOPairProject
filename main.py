@@ -199,10 +199,12 @@ def main():
     }
 
     print(
-        CYAN + BOLD + "\nBuilding your 3 personalized trip plans...\n" 
+        CYAN + BOLD + "\nBuilding your 3 personalized trip plans...\n"
         + RESET
     )
-    plans = planner_module.build_all_plans(trip_dict, norm_flights, norm_hotels)
+    plans = planner_module.build_all_plans(
+        trip_dict, norm_flights, norm_hotels
+    )
 
     for plan_name, plan in plans.items():
         flight = plan["flight"]
@@ -218,7 +220,9 @@ def main():
             hotel["Rating"], hotel["Location"]
         )
 
-        itinerary = gemini_module.generate_itinerary(gemini_key, plan, trip_dict)
+        itinerary = gemini_module.generate_itinerary(
+            gemini_key, plan, trip_dict
+        )
         if itinerary is None:
             itinerary = gemini_module.fallback_itinerary(plan, trip_dict)
 
