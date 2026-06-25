@@ -72,6 +72,11 @@ PLAN_ACTIVITIES = Table(
     Column("Day_Number", Integer, nullable=False)
 )
 
+""" Allows to switch to another database """
+def set_database(db_url):
+    global engine
+    engine = create_engine(db_url, echo=False)
+
 """ Initialize the database using all the created tables """
 def init_db():
     metaData.create_all(engine)
