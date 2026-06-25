@@ -84,10 +84,17 @@ def print_plan(plan_name, plan, itinerary):
         GREEN + "  Base Cost (flight + hotel): " + RESET +
         "$" + str(plan["base_cost"])
     )
-    print(
-        GREEN + "  Remaining Activity Budget:  " + RESET +
-        "$" + str(plan["activity_budget"])
-    )
+    activity_budget = plan["activity_budget"]
+    if activity_budget < 0:
+        print(
+            RED + "  Over budget by: $" +
+            str(abs(activity_budget)) + RESET
+        )
+    else:
+        print(
+            GREEN + "  Remaining Activity Budget:  " + RESET +
+            "$" + str(activity_budget)
+        )
     print(CYAN + "\nItinerary:" + RESET)
     print(format_markdown(itinerary))
 
@@ -105,6 +112,14 @@ def main():
 
     print(CYAN + BOLD + "\nWelcome to TripWise!" + RESET)
     print(WHITE + "=" * 40 + RESET)
+    print(WHITE + "Plan your perfect trip in seconds." + RESET)
+    print(
+        WHITE +
+        "Tell us where you're going and we'll build 3 personalized" +
+        " plans — cheapest, balanced, and experience-focused." +
+        RESET
+    )
+    print("")
 
     origin = input(YELLOW + "Departure airport code (e.g. JFK): " + RESET)
     origin = origin.strip().upper()
@@ -124,8 +139,10 @@ def main():
     travelers = int(input(
         YELLOW + "Number of travelers: " + RESET
     ).strip())
-    print(YELLOW + "Travel styles: foodie, adventure, relaxed" + RESET)
-    style = input(YELLOW + "Your travel style: " + RESET).strip()
+    style = input(
+        YELLOW + "Your travel style (e.g. foodie, adventure, relaxed): " +
+        RESET
+    ).strip()
     interests = input(
         YELLOW + "Interests, comma-separated (e.g. food,culture,art): " + RESET
     ).strip()
@@ -180,15 +197,8 @@ def main():
         "Interests": interests
     }
 
-    print(
-        CYAN
-        + BOLD
-        + "\nBuilding your 3 personalized trip plans...\n"
-        + RESET
-    )
-    plans = planner_module.build_all_plans(
-        trip_dict, norm_flights, norm_hotels
-    )
+    print(CYAN + BOLD + "\nBuilding your 3 personalized trip plans...\n" + RESET)
+    plans = planner_module.build_all_plans(trip_dict, norm_flights, norm_hotels)
 
     for plan_name, plan in plans.items():
         flight = plan["flight"]
@@ -204,9 +214,7 @@ def main():
             hotel["Rating"], hotel["Location"]
         )
 
-        itinerary = gemini_module.generate_itinerary(
-            gemini_key, plan, trip_dict
-        )
+        itinerary = gemini_module.generate_itinerary(gemini_key, plan, trip_dict)
         if itinerary is None:
             itinerary = gemini_module.fallback_itinerary(plan, trip_dict)
 
